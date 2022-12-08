@@ -4,43 +4,38 @@ namespace PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Engineering;
 
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 use PhpOffice\PhpSpreadsheet\Calculation\Engineering;
-use PhpOffice\PhpSpreadsheet\Calculation\Functions;
-use PHPUnit\Framework\TestCase;
 
-class ConvertUoMTest extends TestCase
+class ConvertUoMTest extends AllSetupTeardown
 {
-    protected function setUp(): void
-    {
-        Functions::setCompatibilityMode(Functions::COMPATIBILITY_EXCEL);
-    }
+    const UOM_PRECISION = 1E-12;
 
     public function testGetConversionGroups(): void
     {
-        $result = Engineering::getConversionGroups();
+        $result = Engineering\ConvertUOM::getConversionCategories();
         self::assertIsArray($result);
     }
 
     public function testGetConversionGroupUnits(): void
     {
-        $result = Engineering::getConversionGroupUnits();
+        $result = Engineering\ConvertUOM::getConversionCategoryUnits();
         self::assertIsArray($result);
     }
 
     public function testGetConversionGroupUnitDetails(): void
     {
-        $result = Engineering::getConversionGroupUnitDetails();
+        $result = Engineering\ConvertUOM::getConversionCategoryUnitDetails();
         self::assertIsArray($result);
     }
 
     public function testGetConversionMultipliers(): void
     {
-        $result = Engineering::getConversionMultipliers();
+        $result = Engineering\ConvertUOM::getConversionMultipliers();
         self::assertIsArray($result);
     }
 
     public function testGetBinaryConversionMultipliers(): void
     {
-        $result = Engineering::getBinaryConversionMultipliers();
+        $result = Engineering\ConvertUOM::getBinaryConversionMultipliers();
         self::assertIsArray($result);
     }
 
@@ -51,8 +46,7 @@ class ConvertUoMTest extends TestCase
      */
     public function testCONVERTUOM($expectedResult, ...$args): void
     {
-        $result = Engineering::CONVERTUOM(...$args);
-        self::assertEquals($expectedResult, $result);
+        $this->runTestCase('CONVERT', $expectedResult, ...$args);
     }
 
     public function providerCONVERTUOM(): array
@@ -69,7 +63,7 @@ class ConvertUoMTest extends TestCase
 
         $formula = "=CONVERT({$value}, {$fromUoM}, {$toUoM})";
         $result = $calculation->_calculateFormulaValue($formula);
-        self::assertEqualsWithDelta($expectedResult, $result, 1.0e-14);
+        self::assertEqualsWithDelta($expectedResult, $result, self::UOM_PRECISION);
     }
 
     public function providerConvertUoMArray(): array

@@ -3,31 +3,19 @@
 namespace PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Engineering;
 
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
-use PhpOffice\PhpSpreadsheet\Calculation\Engineering;
-use PhpOffice\PhpSpreadsheet\Calculation\Functions;
-use PHPUnit\Framework\TestCase;
 
-class ErfTest extends TestCase
+class ErfTest extends AllSetupTeardown
 {
     const ERF_PRECISION = 1E-12;
-
-    protected function setUp(): void
-    {
-        Functions::setCompatibilityMode(Functions::COMPATIBILITY_EXCEL);
-    }
 
     /**
      * @dataProvider providerERF
      *
-     * @param mixed $lower
-     * @param null|mixed $upper
      * @param mixed $expectedResult
      */
-    public function testERF($expectedResult, $lower, $upper = null): void
+    public function testERF($expectedResult, ...$args): void
     {
-        $result = Engineering::ERF($lower, $upper);
-        self::assertEquals($expectedResult, $result);
-        self::assertEqualsWithDelta($expectedResult, $result, self::ERF_PRECISION);
+        $this->runTestCase('ERF', $expectedResult, ...$args);
     }
 
     public function providerERF(): array
@@ -44,7 +32,7 @@ class ErfTest extends TestCase
 
         $formula = "=ERF({$lower}, {$upper})";
         $result = $calculation->_calculateFormulaValue($formula);
-        self::assertEqualsWithDelta($expectedResult, $result, 1.0e-14);
+        self::assertEqualsWithDelta($expectedResult, $result, self::ERF_PRECISION);
     }
 
     public function providerErfArray(): array

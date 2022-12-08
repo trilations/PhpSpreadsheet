@@ -109,7 +109,9 @@ class AxisPropertiesTest extends AbstractFunctional
             '8', //minimum
             '68', //maximum
             '20', //majorUnit
-            '5' //minorUnit
+            '5', //minorUnit
+            '6', //textRotation
+            '0', //hidden
         );
         self::assertSame(Properties::AXIS_LABELS_HIGH, $xAxis->getAxisOptionsProperty('axis_labels'));
         self::assertNull($xAxis->getAxisOptionsProperty('horizontal_crosses_value'));
@@ -121,6 +123,8 @@ class AxisPropertiesTest extends AbstractFunctional
         self::assertSame('68', $xAxis->getAxisOptionsProperty('maximum'));
         self::assertSame('20', $xAxis->getAxisOptionsProperty('major_unit'));
         self::assertSame('5', $xAxis->getAxisOptionsProperty('minor_unit'));
+        self::assertSame('6', $xAxis->getAxisOptionsProperty('textRotation'));
+        self::assertSame('0', $xAxis->getAxisOptionsProperty('hidden'));
 
         $yAxis = new Axis();
         $yAxis->setFillParameters('accent1', 30, 'schemeClr');
@@ -158,6 +162,8 @@ class AxisPropertiesTest extends AbstractFunctional
         self::assertSame('68', $xAxis2->getAxisOptionsProperty('maximum'));
         self::assertSame('20', $xAxis2->getAxisOptionsProperty('major_unit'));
         self::assertSame('5', $xAxis2->getAxisOptionsProperty('minor_unit'));
+        self::assertSame('6', $xAxis2->getAxisOptionsProperty('textRotation'));
+        self::assertSame('0', $xAxis2->getAxisOptionsProperty('hidden'));
 
         $yAxis2 = $chart->getChartAxisY();
         self::assertSame('accent1', $yAxis2->getFillProperty('value'));
@@ -198,6 +204,8 @@ class AxisPropertiesTest extends AbstractFunctional
         self::assertSame('68', $xAxis3->getAxisOptionsProperty('maximum'));
         self::assertSame('20', $xAxis3->getAxisOptionsProperty('major_unit'));
         self::assertSame('5', $xAxis3->getAxisOptionsProperty('minor_unit'));
+        self::assertSame('6', $xAxis3->getAxisOptionsProperty('textRotation'));
+        self::assertSame('0', $xAxis3->getAxisOptionsProperty('hidden'));
 
         $yAxis3 = $chart2->getChartAxisY();
         self::assertSame('accent1', $yAxis3->getFillProperty('value'));
@@ -213,9 +221,9 @@ class AxisPropertiesTest extends AbstractFunctional
         self::assertSame('5', $xAxis3->getAxisOptionsProperty('horizontal_crosses_value'));
 
         $yAxis3->setLineColorProperties('0000FF', null, 'srgbClr');
-        self::assertSame('0000FF', $yAxis3->getLineProperty('value'));
-        self::assertNull($yAxis3->getLineProperty('alpha'));
-        self::assertSame('srgbClr', $yAxis3->getLineProperty('type'));
+        self::assertSame('0000FF', $yAxis3->getLineColorProperty('value'));
+        self::assertNull($yAxis3->getLineColorProperty('alpha'));
+        self::assertSame('srgbClr', $yAxis3->getLineColorProperty('type'));
         $yAxis3->setAxisNumberProperties(Properties::FORMAT_CODE_GENERAL);
         self::assertFalse($yAxis3->getAxisIsNumericFormat());
         $yAxis3->setAxisNumberProperties(Properties::FORMAT_CODE_NUMBER);
