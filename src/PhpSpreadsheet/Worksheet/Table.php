@@ -4,8 +4,10 @@ namespace PhpOffice\PhpSpreadsheet\Worksheet;
 
 use PhpOffice\PhpSpreadsheet\Cell\AddressRange;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
 
 class Table
@@ -15,7 +17,7 @@ class Table
      *
      * @var string
      */
-    private $name = '';
+    private $name;
 
     /**
      * Show Header Row.
@@ -44,6 +46,13 @@ class Table
      * @var null|Worksheet
      */
     private $workSheet;
+
+    /**
+     * Table allow filter.
+     *
+     * @var bool
+     */
+    private $allowFilter = true;
 
     /**
      * Table Column.
@@ -139,7 +148,7 @@ class Table
         $tableName = StringHelper::strToLower($name);
 
         if ($worksheet !== null && StringHelper::strToLower($this->name) !== $name) {
-            $spreadsheet = $worksheet->getParent();
+            $spreadsheet = $worksheet->getParentOrThrow();
 
             foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
                 foreach ($sheet->getTableCollection() as $table) {
@@ -153,12 +162,48 @@ class Table
 
     private function updateStructuredReferences(string $name): void
     {
-        // Remember that table names are case-insensitive
-        $name = StringHelper::strToLower($name);
+        if ($this->workSheet === null || $this->name === null || $this->name === '') {
+            return;
+        }
 
-        if ($this->name !== null && StringHelper::strToLower($this->name) !== $name) {
+        // Remember that table names are case-insensitive
+        if (StringHelper::strToLower($this->name) !== StringHelper::strToLower($name)) {
             // We need to check all formula cells that might contain fully-qualified Structured References
             //    that refer to this table, and update those formulae to reference the new table name
+            $spreadsheet = $this->workSheet->getParentOrThrow();
+            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+                $this->updateStructuredReferencesInCells($sheet, $name);
+            }
+            $this->updateStructuredReferencesInNamedFormulae($spreadsheet, $name);
+        }
+    }
+
+    private function updateStructuredReferencesInCells(Worksheet $worksheet, string $newName): void
+    {
+        $pattern = '/' . preg_quote($this->name) . '\[/mui';
+
+        foreach ($worksheet->getCoordinates(false) as $coordinate) {
+            $cell = $worksheet->getCell($coordinate);
+            if ($cell->getDataType() === DataType::TYPE_FORMULA) {
+                $formula = $cell->getValue();
+                if (preg_match($pattern, $formula) === 1) {
+                    $formula = preg_replace($pattern, "{$newName}[", $formula);
+                    $cell->setValueExplicit($formula, DataType::TYPE_FORMULA);
+                }
+            }
+        }
+    }
+
+    private function updateStructuredReferencesInNamedFormulae(Spreadsheet $spreadsheet, string $newName): void
+    {
+        $pattern = '/' . preg_quote($this->name) . '\[/mui';
+
+        foreach ($spreadsheet->getNamedFormulae() as $namedFormula) {
+            $formula = $namedFormula->getValue();
+            if (preg_match($pattern, $formula) === 1) {
+                $formula = preg_replace($pattern, "{$newName}[", $formula);
+                $namedFormula->setValue($formula); // @phpstan-ignore-line
+            }
         }
     }
 
@@ -199,6 +244,26 @@ class Table
     }
 
     /**
+     * Get allow filter.
+     * If false, autofiltering is disabled for the table, if true it is enabled.
+     */
+    public function getAllowFilter(): bool
+    {
+        return $this->allowFilter;
+    }
+
+    /**
+     * Set show Autofiltering.
+     * Disabling autofiltering has the same effect as hiding the filter button on all the columns in the table.
+     */
+    public function setAllowFilter(bool $allowFilter): self
+    {
+        $this->allowFilter = $allowFilter;
+
+        return $this;
+    }
+
+    /**
      * Get Table Range.
      */
     public function getRange(): string
@@ -233,8 +298,8 @@ class Table
         }
 
         [$width, $height] = Coordinate::rangeDimension($range);
-        if ($width < 1 || $height < 2) {
-            throw new PhpSpreadsheetException('The table range must be at least 1 column and 2 rows');
+        if ($width < 1 || $height < 1) {
+            throw new PhpSpreadsheetException('The table range must be at least 1 column and row');
         }
 
         $this->range = $range;
@@ -282,7 +347,7 @@ class Table
     public function setWorksheet(?Worksheet $worksheet = null): self
     {
         if ($this->name !== '' && $worksheet !== null) {
-            $spreadsheet = $worksheet->getParent();
+            $spreadsheet = $worksheet->getParentOrThrow();
             $tableName = StringHelper::strToUpper($this->name);
 
             foreach ($spreadsheet->getWorksheetIterator() as $sheet) {

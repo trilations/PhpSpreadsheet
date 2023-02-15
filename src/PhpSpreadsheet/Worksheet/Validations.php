@@ -23,7 +23,7 @@ class Validations
 //                throw new Exception('Reference is not for this worksheet');
 //            }
 
-            return empty($worksheet) ? strtoupper($address) : $worksheet . '!' . strtoupper($address);
+            return empty($worksheet) ? strtoupper("$address") : $worksheet . '!' . strtoupper("$address");
         }
 
         if (is_array($cellAddress)) {
@@ -103,7 +103,7 @@ class Validations
         $coordinate = strtoupper($coordinate);
         // Eliminate leading equal sign
         $testCoordinate = (string) preg_replace('/^=/', '', $coordinate);
-        $defined = $worksheet->getParent()->getDefinedName($testCoordinate, $worksheet);
+        $defined = $worksheet->getParentOrThrow()->getDefinedName($testCoordinate, $worksheet);
         if ($defined !== null) {
             if ($defined->getWorksheet() === $worksheet && !$defined->isFormula()) {
                 $coordinate = (string) preg_replace('/^=/', '', $defined->getValue());
