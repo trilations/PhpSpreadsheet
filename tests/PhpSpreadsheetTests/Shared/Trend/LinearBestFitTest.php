@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpOffice\PhpSpreadsheetTests\Shared\Trend;
 
 use PhpOffice\PhpSpreadsheet\Shared\Trend\LinearBestFit;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class LinearBestFitTest extends TestCase
@@ -10,22 +13,20 @@ class LinearBestFitTest extends TestCase
     const LBF_PRECISION = 1.0E-8;
 
     /**
-     * @dataProvider providerLinearBestFit
-     *
-     * @param mixed $expectedSlope
-     * @param mixed $expectedIntersect
-     * @param mixed $expectedGoodnessOfFit
-     * @param mixed $yValues
-     * @param mixed $xValues
-     * @param mixed $expectedEquation
+     * @param array<mixed> $expectedSlope
+     * @param array<mixed> $expectedIntersect
+     * @param array<mixed> $expectedGoodnessOfFit
+     * @param array<float> $yValues
+     * @param array<float> $xValues
      */
+    #[DataProvider('providerLinearBestFit')]
     public function testLinearBestFit(
-        $expectedSlope,
-        $expectedIntersect,
-        $expectedGoodnessOfFit,
-        $expectedEquation,
-        $yValues,
-        $xValues
+        array $expectedSlope,
+        array $expectedIntersect,
+        array $expectedGoodnessOfFit,
+        mixed $expectedEquation,
+        array $yValues,
+        array $xValues
     ): void {
         $bestFit = new LinearBestFit($yValues, $xValues);
         $slope = $bestFit->getSlope(1);

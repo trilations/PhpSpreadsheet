@@ -4,6 +4,12 @@ namespace PhpOffice\PhpSpreadsheet\Helper;
 
 use PhpOffice\PhpSpreadsheet\Exception;
 
+/**
+ * Assist downloading files when samples are run in browser.
+ * Never run as part of unit tests, which are command line.
+ *
+ * @codeCoverageIgnore
+ */
 class Downloader
 {
     protected string $filepath;
@@ -17,24 +23,26 @@ class Downloader
         'xls' => 'application/vnd.ms-excel',
         'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         'csv' => 'text/csv',
+        'html' => 'text/html',
         'pdf' => 'application/pdf',
     ];
 
     public function __construct(string $folder, string $filename, ?string $filetype = null)
     {
         if ((is_dir($folder) === false) || (is_readable($folder) === false)) {
-            throw new Exception("Folder {$folder} is not accessable");
+            throw new Exception('Folder is not accessible');
         }
         $filepath = "{$folder}/{$filename}";
         $this->filepath = (string) realpath($filepath);
         $this->filename = basename($filepath);
-        if ((file_exists($this->filepath) === false) || (is_readable($this->filepath) === false)) {
-            throw new Exception("{$this->filename} not found, or cannot be read");
+        clearstatcache();
+        if ((is_file($this->filepath) === false) || (is_readable($this->filepath) === false)) {
+            throw new Exception('File not found, or not a regular file, or cannot be read');
         }
 
         $filetype ??= pathinfo($filename, PATHINFO_EXTENSION);
         if (array_key_exists(strtolower($filetype), self::CONTENT_TYPES) === false) {
-            throw new Exception("Invalid filetype: {$filetype} cannot be downloaded");
+            throw new Exception('Invalid filetype: file cannot be downloaded');
         }
         $this->filetype = strtolower($filetype);
     }
@@ -48,7 +56,13 @@ class Downloader
 
     public function headers(): void
     {
-        ob_clean();
+        // I cannot tell what this ob_clean is paired with.
+        // I have never seen a problem with it, but someone has - issue 3739.
+        // Perhaps it should be removed altogether,
+        // but making it conditional seems harmless, and safer.
+        if ((int) ob_get_length() > 0) {
+            ob_clean();
+        }
 
         $this->contentType();
         $this->contentDisposition();

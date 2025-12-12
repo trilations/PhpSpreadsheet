@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Web;
 
 use PhpOffice\PhpSpreadsheet\Settings;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -13,8 +16,7 @@ use Psr\Http\Message\StreamInterface;
 
 class WebServiceTest extends TestCase
 {
-    /** @var ?Spreadsheet */
-    private $spreadsheet;
+    private ?Spreadsheet $spreadsheet = null;
 
     protected function tearDown(): void
     {
@@ -25,9 +27,8 @@ class WebServiceTest extends TestCase
         Settings::unsetHttpClient();
     }
 
-    /**
-     * @dataProvider providerWEBSERVICE
-     */
+    /** @param null|mixed[] $responseData */
+    #[DataProvider('providerWEBSERVICE')]
     public function testWEBSERVICE(string $expectedResult, string $url, ?array $responseData): void
     {
         if (!empty($responseData)) {

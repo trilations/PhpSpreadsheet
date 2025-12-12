@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'current column' => [2, 'omitted'],
     'global name $E$2:$E$6' => [5, 'namedrangex'],
@@ -13,5 +15,5 @@ return [
     'unknown name' => ['#NAME?', 'namedrange2'],
     'unknown name as first part of range' => ['#NAME?', 'Invalid:A2'],
     'unknown name as second part of range' => ['#NAME?', 'A2:Invalid'],
-    //'qualified name' => [6, 'OtherSheet!localname'], // Never reaches function
+    'qualified name' => [6, 'OtherSheet!localname'],
 ];

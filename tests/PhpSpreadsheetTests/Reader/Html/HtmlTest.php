@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpOffice\PhpSpreadsheetTests\Reader\Html;
 
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
@@ -19,19 +21,7 @@ class HtmlTest extends TestCase
         self::assertFalse($reader->canRead($filename));
     }
 
-    public function testBadHtml(): void
-    {
-        $filename = 'tests/data/Reader/HTML/badhtml.html';
-        $reader = new Html();
-        self::assertTrue($reader->canRead($filename));
-
-        if (method_exists($this, 'setOutputCallback')) {
-            // The meat of this test is moved to HtmlPhpunit10Test
-            // to run under all PhpUnit versions.
-            $this->expectException(ReaderException::class);
-            $reader->load($filename);
-        }
-    }
+    // testBadHtml moved to HtmlPhpunit10Test
 
     public function testNonHtml(): void
     {
@@ -62,13 +52,8 @@ class HtmlTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider providerCanReadVerySmallFile
-     *
-     * @param bool $expected
-     * @param string $content
-     */
-    public function testCanReadVerySmallFile($expected, $content): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerCanReadVerySmallFile')]
+    public function testCanReadVerySmallFile(bool $expected, string $content): void
     {
         $filename = HtmlHelper::createHtml($content);
         $reader = new Html();
@@ -88,8 +73,7 @@ class HtmlTest extends TestCase
                         <td style="background-color: antiquewhite2;color: aliceblue">Unknown fore/background</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
         $style = $firstSheet->getCell('A1')->getStyle();
         self::assertEquals('FFFFFF', $style->getFont()->getColor()->getRGB());
@@ -118,8 +102,7 @@ class HtmlTest extends TestCase
                         <td style="text-decoration: line-through;">Line through</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
         $style = $firstSheet->getCell('A1')->getStyle();
@@ -151,20 +134,16 @@ class HtmlTest extends TestCase
                         <td width="50px">50px</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
         $dimension = $firstSheet->getColumnDimension('A');
-        self::assertNotNull($dimension);
         self::assertEquals(50, $dimension->getWidth());
 
         $dimension = $firstSheet->getColumnDimension('B');
-        self::assertNotNull($dimension);
         self::assertEquals(100, $dimension->getWidth('px'));
 
         $dimension = $firstSheet->getColumnDimension('C');
-        self::assertNotNull($dimension);
         self::assertEquals(50, $dimension->getWidth('px'));
         $spreadsheet->disconnectWorksheets();
     }
@@ -182,20 +161,16 @@ class HtmlTest extends TestCase
                         <td height="50px">1</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
         $dimension = $firstSheet->getRowDimension(1);
-        self::assertNotNull($dimension);
         self::assertEquals(50, $dimension->getRowHeight());
 
         $dimension = $firstSheet->getRowDimension(2);
-        self::assertNotNull($dimension);
         self::assertEquals(100, $dimension->getRowHeight('px'));
 
         $dimension = $firstSheet->getRowDimension(3);
-        self::assertNotNull($dimension);
         self::assertEquals(50, $dimension->getRowHeight('px'));
         $spreadsheet->disconnectWorksheets();
     }
@@ -208,12 +183,11 @@ class HtmlTest extends TestCase
                         <td valign="center">Center valign</td>
                         <td style="text-align: center;">Center align</td>
                         <td style="vertical-align: center;">Center valign</td>
-                        <td style="text-indent: 10px;">Text indent</td>
+                        <td style="text-indent: 9px;">Text indent</td>
                         <td style="word-wrap: break-word;">Wraptext</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
         $style = $firstSheet->getCell('A1')->getStyle();
@@ -229,7 +203,7 @@ class HtmlTest extends TestCase
         self::assertEquals(Alignment::VERTICAL_CENTER, $style->getAlignment()->getVertical());
 
         $style = $firstSheet->getCell('E1')->getStyle();
-        self::assertEquals(10, $style->getAlignment()->getIndent());
+        self::assertEquals(1, $style->getAlignment()->getIndent());
 
         $style = $firstSheet->getCell('F1')->getStyle();
         self::assertTrue($style->getAlignment()->getWrapText());
@@ -245,8 +219,7 @@ class HtmlTest extends TestCase
                         <td data-format="#.000">x</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $sheet = $spreadsheet->getSheet(0);
 
         self::assertEquals('mmm-yy', $sheet->getStyle('A1')->getNumberFormat()->getFormatCode());
@@ -271,8 +244,7 @@ class HtmlTest extends TestCase
                         <td>Hello<br>World</td>
                     </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
         $cellStyle = $firstSheet->getStyle('A1');
@@ -311,14 +283,13 @@ class HtmlTest extends TestCase
                   </tr>
                   <tr>
                     <td>2</td>
-                    <td style="text-indent:10px">Text Indent</td>
+                    <td style="text-indent:9px">Text Indent</td>
                   </tr>
                 </table>';
-        $filename = HtmlHelper::createHtml($html);
-        $spreadsheet = HtmlHelper::loadHtmlIntoSpreadsheet($filename, true);
+        $spreadsheet = HtmlHelper::loadHtmlStringIntoSpreadsheet($html);
         $firstSheet = $spreadsheet->getSheet(0);
         $style = $firstSheet->getCell('C2')->getStyle();
-        self::assertEquals(10, $style->getAlignment()->getIndent());
+        self::assertEquals(1, $style->getAlignment()->getIndent());
         $spreadsheet->disconnectWorksheets();
     }
 
@@ -396,6 +367,7 @@ class HtmlTest extends TestCase
                         <td data-type="s">=B1</td>
                         <td data-type="d">2022-02-21 10:20:30</td>
                         <td data-type="null">null</td>
+                        <td data-type="b">0</td>
                         <td data-type="invalid-datatype">text with invalid datatype</td>
                     </tr>
                 </table>';
@@ -404,9 +376,10 @@ class HtmlTest extends TestCase
         $spreadsheet = $reader->loadFromString($html);
         $firstSheet = $spreadsheet->getSheet(0);
 
-        // check boolean data type
+        // check boolean data type and true
         self::assertEquals(DataType::TYPE_BOOL, $firstSheet->getCell('A1')->getDataType());
         self::assertIsBool($firstSheet->getCell('A1')->getValue());
+        self::assertTrue($firstSheet->getCell('A1')->getValue());
 
         // check string data type
         self::assertEquals(DataType::TYPE_STRING, $firstSheet->getCell('B1')->getDataType());
@@ -422,5 +395,10 @@ class HtmlTest extends TestCase
 
         //null
         self::assertEquals($firstSheet->getCell('E1')->getValue(), null);
+
+        // check boolean data type and true
+        self::assertEquals(DataType::TYPE_BOOL, $firstSheet->getCell('F1')->getDataType());
+        self::assertIsBool($firstSheet->getCell('F1')->getValue());
+        self::assertFalse($firstSheet->getCell('F1')->getValue());
     }
 }

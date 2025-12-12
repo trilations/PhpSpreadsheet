@@ -1,19 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpOffice\PhpSpreadsheetTests\Calculation\Functions\Statistical;
 
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 
 class TinvTest extends AllSetupTeardown
 {
-    /**
-     * @dataProvider providerTINV
-     *
-     * @param mixed $expectedResult
-     * @param mixed $probability
-     * @param mixed $degrees
-     */
-    public function testTINV($expectedResult, $probability, $degrees): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerTINV')]
+    public function testTINV(mixed $expectedResult, mixed $probability, mixed $degrees): void
     {
         $this->runTestCaseReference('TINV', $expectedResult, $probability, $degrees);
     }
@@ -23,15 +19,13 @@ class TinvTest extends AllSetupTeardown
         return require 'tests/data/Calculation/Statistical/TINV.php';
     }
 
-    /**
-     * @dataProvider providerTInvArray
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerTInvArray')]
     public function testTInvArray(array $expectedResult, string $values, string $degrees): void
     {
         $calculation = Calculation::getInstance();
 
         $formula = "=TINV({$values}, {$degrees})";
-        $result = $calculation->_calculateFormulaValue($formula);
+        $result = $calculation->calculateFormula($formula);
         self::assertEqualsWithDelta($expectedResult, $result, 1.0e-14);
     }
 

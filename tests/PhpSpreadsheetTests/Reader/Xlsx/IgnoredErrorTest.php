@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpOffice\PhpSpreadsheetTests\Reader\Xlsx;
 
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
@@ -36,6 +38,8 @@ class IgnoredErrorTest extends AbstractFunctional
 
         self::assertFalse($sheet->getCell('C12')->getIgnoredErrors()->getEvalError());
         self::assertTrue($sheet->getCell('C11')->getIgnoredErrors()->getEvalError());
+        self::assertFalse($sheet->getCell('E14')->getIgnoredErrors()->getFormulaRange());
+        self::assertTrue($sheet->getCell('F14')->getIgnoredErrors()->getFormulaRange());
 
         $sheetLast = $spreadsheet->getSheetByNameOrThrow('Last');
         self::assertFalse($sheetLast->getCell('D2')->getIgnoredErrors()->getFormula());
