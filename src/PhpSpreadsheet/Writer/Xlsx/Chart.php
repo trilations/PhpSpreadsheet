@@ -3,6 +3,7 @@
 namespace PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use PhpOffice\PhpSpreadsheet\Chart\Axis;
+use PhpOffice\PhpSpreadsheet\Chart\AxisPositionXml;
 use PhpOffice\PhpSpreadsheet\Chart\Chart as SpreadsheetChart;
 use PhpOffice\PhpSpreadsheet\Chart\ChartColor;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
@@ -440,13 +441,13 @@ class Chart extends WriterPart
         }
 
         if (($chartType !== DataSeries::TYPE_PIECHART) && ($chartType !== DataSeries::TYPE_PIECHART_3D) && ($chartType !== DataSeries::TYPE_DONUTCHART)) {
-            if ($chartType === DataSeries::TYPE_BUBBLECHART) {
-                $this->writeValueAxis($objWriter, $xAxisLabel, $chartType, $id2, $id1, $catIsMultiLevelSeries, $xAxis ?? new Axis());
+            if ($chartType === DataSeries::TYPE_BUBBLECHART || $chartType === DataSeries::TYPE_SCATTERCHART) {
+                $this->writeValueAxis($objWriter, $xAxisLabel, $chartType, $id2, $id1, $catIsMultiLevelSeries, $xAxis ?? new Axis(), AxisPositionXml::BOTTOM);
             } else {
                 $this->writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $catIsMultiLevelSeries, $xAxis ?? new Axis());
             }
 
-            $this->writeValueAxis($objWriter, $yAxisLabel, $chartType, $id1, $id2, $valIsMultiLevelSeries, $yAxis ?? new Axis());
+            $this->writeValueAxis($objWriter, $yAxisLabel, $chartType, $id1, $id2, $valIsMultiLevelSeries, $yAxis ?? new Axis(), AxisPositionXml::LEFT);
             if ($chartType === DataSeries::TYPE_SURFACECHART_3D || $chartType === DataSeries::TYPE_SURFACECHART) {
                 $this->writeSerAxis($objWriter, $id2, $id3);
             }
@@ -785,7 +786,7 @@ class Chart extends WriterPart
      *
      * @param null|string $groupType Chart type
      */
-    private function writeValueAxis(XMLWriter $objWriter, ?Title $yAxisLabel, ?string $groupType, string $id1, string $id2, bool $isMultiLevelSeries, Axis $xAxis): void
+    private function writeValueAxis(XMLWriter $objWriter, ?Title $yAxisLabel, ?string $groupType, string $id1, string $id2, bool $isMultiLevelSeries, Axis $xAxis, string $axisPositionXml): void
     {
         $objWriter->startElement('c:' . Axis::AXIS_TYPE_VALUE);
         $majorGridlines = $xAxis->getMajorGridlines();
@@ -832,7 +833,7 @@ class Chart extends WriterPart
         $objWriter->endElement();
 
         $objWriter->startElement('c:axPos');
-        $objWriter->writeAttribute('val', 'l');
+        $objWriter->writeAttribute('val', $axisPositionXml);;
         $objWriter->endElement();
 
         if ($majorGridlines !== null) {
@@ -1148,6 +1149,15 @@ class Chart extends WriterPart
         $plotSeriesIdx = 0;
         foreach ($plotSeriesOrder as $plotSeriesIdx => $plotSeriesRef) {
             $objWriter->startElement('c:ser');
+
+            if (($groupType == DataSeries::TYPE_SCATTERCHART) || ($groupType == DataSeries::TYPE_BUBBLECHART)) {
+                //    Line Fill
+                $objWriter->startElement('c:spPr');
+                $objWriter->startElement('a:ln');
+                $objWriter->writeElement('a:noFill');
+                $objWriter->endElement();
+                $objWriter->endElement();
+            }
 
             $objWriter->startElement('c:idx');
             $adder = array_key_exists(0, $plotSeriesOrder) ? $this->seriesIndex : 0;
