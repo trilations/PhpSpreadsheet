@@ -102,8 +102,8 @@ class BetterBooleanTest extends Functional\AbstractFunctional
         $rsheet = $reloaded->getActiveSheet();
         self::assertSame(1, $rsheet->getCell('A1')->getValue());
         self::assertSame('Hello', $rsheet->getCell('B1')->getValue());
-        self::assertSame(1, $rsheet->getCell('C1')->getValue());
-        self::assertNull($rsheet->getCell('D1')->getValue());
+        self::assertSame('TRUE', $rsheet->getCell('C1')->getValue());
+        self::assertSame('FALSE', $rsheet->getCell('D1')->getValue());
         self::assertSame(1, $rsheet->getCell('E1')->getValue());
         self::assertSame('AB', $rsheet->getCell('F1')->getValue());
         self::assertSame(3, $rsheet->getCell('G1')->getValue());
@@ -211,6 +211,19 @@ class BetterBooleanTest extends Functional\AbstractFunctional
         self::assertSame('whatever', $sheet->getCell('E1')->getValue());
         self::assertTrue($sheet->getCell('F1')->getValue());
         self::assertSame('1', $sheet->getCell('G1')->getValue());
+        $spreadsheet->disconnectWorksheets();
+    }
+
+    public function testNoPreCalc(): void
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', true);
+        $writer = new HtmlWriter($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
+        $writer->setBetterBoolean(true);
+        $html = $writer->generateHtmlAll();
+        self::assertStringContainsString('<td data-type="b" class="column0 style0 b">TRUE</td>', $html);
         $spreadsheet->disconnectWorksheets();
     }
 }

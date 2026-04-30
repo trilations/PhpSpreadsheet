@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpOffice\PhpSpreadsheetTests\Reader\Xlsx;
 
 use PhpOffice\PhpSpreadsheet\NamedRange;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheetTests\Functional\AbstractFunctional;
 
@@ -94,5 +95,57 @@ class HyperlinkTest extends AbstractFunctional
         }
 
         $reloadedSpreadsheet->disconnectWorksheets();
+    }
+
+    public function testDisplay(): void
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getCell('A1')->setValue('A1 text');
+        $hy1 = $sheet->getCell('A1')->getHyperlink();
+        $hy1->setUrl('http://www.example.com');
+        $hy1->setTooltip('Go to example.com');
+
+        $sheet->getCell('A2')->setValue('A2 text');
+        $hy2 = $sheet->getCell('A2')->getHyperlink();
+        $hy2->setUrl('http://www.example.org');
+        $hy2->setTooltip('Go to example.org');
+        $hy2->setDisplay('A2 display');
+
+        $reloadedSpreadsheet = $this->writeAndReload($spreadsheet, 'Xlsx');
+        $spreadsheet->disconnectWorksheets();
+        $rsheet = $reloadedSpreadsheet->getActiveSheet();
+
+        self::assertSame('A1 text', $rsheet->getCell('A1')->getValue());
+        $rhy1 = $rsheet->getCell('A1')->getHyperlink();
+        self::assertSame('http://www.example.com', $rhy1->getUrl());
+        self::assertSame('Go to example.com', $rhy1->getTooltip());
+        self::assertSame('Go to example.com', $rhy1->getDisplay(), 'display is set to tooltip if unset');
+
+        self::assertSame('A2 text', $rsheet->getCell('A2')->getValue());
+        $rhy2 = $rsheet->getCell('A2')->getHyperlink();
+        self::assertSame('http://www.example.org', $rhy2->getUrl());
+        self::assertSame('Go to example.org', $rhy2->getTooltip());
+        self::assertSame('A2 display', $rhy2->getDisplay(), 'display is explicitly set');
+
+        $reloadedSpreadsheet->disconnectWorksheets();
+    }
+
+    public function testExcelWrittenHyperlinkWithAnchor(): void
+    {
+        $infil = 'tests/data/Reader/XLSX/issue.4842.xlsx';
+        $reader = new XlsxReader();
+        $spreadsheet = $reader->load($infil);
+        $sheet = $spreadsheet->getActiveSheet();
+        $link1 = $sheet->getCell('A1')->getHyperlink();
+        self::assertSame('sheet://Sheet2!H48', $link1->getUrl());
+        $link2 = $sheet->getCell('A2')->getHyperlink();
+        self::assertSame('http://example.com/', $link2->getUrl());
+        $link3 = $sheet->getCell('A3')->getHyperlink();
+        self::assertSame('http://example.com/#anchor', $link3->getUrl());
+        $link4 = $sheet->getCell('A4')->getHyperlink();
+        self::assertSame('http://example.com/x.html#link', $link4->getUrl());
+        $spreadsheet->disconnectWorksheets();
     }
 }

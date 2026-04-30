@@ -270,7 +270,7 @@ TRANSPOSE                | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\Matri
 UNIQUE                   | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\Unique::unique
 VLOOKUP                  | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\VLookup::lookup
 VSTACK                   | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\Vstack::vstack
-XLOOKUP                  | **Not yet Implemented**
+XLOOKUP                  | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\XLookup::lookup
 XMATCH                   | **Not yet Implemented**
 
 ## CATEGORY_MATH_AND_TRIG
@@ -497,11 +497,11 @@ STDEVA                   | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Sta
 STDEVP                   | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\StandardDeviations::STDEVP
 STDEVPA                  | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\StandardDeviations::STDEVPA
 STEYX                    | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Trends::STEYX
-T.DIST                   | **Not yet Implemented**
-T.DIST.2T                | **Not yet Implemented**
-T.DIST.RT                | **Not yet Implemented**
-T.INV                    | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::inverse
-T.INV.2T                 | **Not yet Implemented**
+T.DIST                   | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDist
+T.DIST.2T                | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDistDot2T
+T.DIST.RT                | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDistDotRT
+T.INV                    | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotInv
+T.INV.2T                 | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::inverse
 T.TEST                   | **Not yet Implemented**
 TDIST                    | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::distribution
 TINV                     | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::inverse

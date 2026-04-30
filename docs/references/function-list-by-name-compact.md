@@ -555,11 +555,11 @@ SYD                      | FINANCIAL             | Financial\Depreciation::SYD
 Excel Function           | Category              | PhpSpreadsheet Function
 -------------------------|-----------------------|--------------------------------------
 T                        | TEXT_AND_DATA         | TextData\Text::test
-T.DIST                   | STATISTICAL           | **Not yet Implemented**
-T.DIST.2T                | STATISTICAL           | **Not yet Implemented**
-T.DIST.RT                | STATISTICAL           | **Not yet Implemented**
-T.INV                    | STATISTICAL           | Statistical\Distributions\StudentT::inverse
-T.INV.2T                 | STATISTICAL           | **Not yet Implemented**
+T.DIST                   | STATISTICAL           | Statistical\Distributions\StudentT::tDotDist
+T.DIST.2T                | STATISTICAL           | Statistical\Distributions\StudentT::tDotDistDot2T
+T.DIST.RT                | STATISTICAL           | Statistical\Distributions\StudentT::tDotDistDotRT
+T.INV                    | STATISTICAL           | Statistical\Distributions\StudentT::tDotInv
+T.INV.2T                 | STATISTICAL           | Statistical\Distributions\StudentT::inverse
 T.TEST                   | STATISTICAL           | **Not yet Implemented**
 TAKE                     | LOOKUP_AND_REFERENCE  | LookupRef\ChooseRowsEtc::take
 TAN                      | MATH_AND_TRIG         | MathTrig\Trig\Tangent::tan
@@ -640,7 +640,7 @@ WRAPROWS                 | MATH_AND_TRIG         | **Not yet Implemented**
 Excel Function           | Category              | PhpSpreadsheet Function
 -------------------------|-----------------------|--------------------------------------
 XIRR                     | FINANCIAL             | Financial\CashFlow\Variable\NonPeriodic::rate
-XLOOKUP                  | LOOKUP_AND_REFERENCE  | **Not yet Implemented**
+XLOOKUP                  | LOOKUP_AND_REFERENCE  | LookupRef\XLookup::lookup
 XMATCH                   | LOOKUP_AND_REFERENCE  | **Not yet Implemented**
 XNPV                     | FINANCIAL             | Financial\CashFlow\Variable\NonPeriodic::presentValue
 XOR                      | LOGICAL               | Logical\Operations::logicalXor

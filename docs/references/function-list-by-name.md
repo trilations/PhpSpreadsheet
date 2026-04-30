@@ -551,11 +551,11 @@ SYD                      | CATEGORY_FINANCIAL             | \PhpOffice\PhpSpread
 Excel Function           | Category                       | PhpSpreadsheet Function
 -------------------------|--------------------------------|--------------------------------------
 T                        | CATEGORY_TEXT_AND_DATA         | \PhpOffice\PhpSpreadsheet\Calculation\TextData\Text::test
-T.DIST                   | CATEGORY_STATISTICAL           | **Not yet Implemented**
-T.DIST.2T                | CATEGORY_STATISTICAL           | **Not yet Implemented**
-T.DIST.RT                | CATEGORY_STATISTICAL           | **Not yet Implemented**
-T.INV                    | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::inverse
-T.INV.2T                 | CATEGORY_STATISTICAL           | **Not yet Implemented**
+T.DIST                   | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDist
+T.DIST.2T                | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDistDot2T
+T.DIST.RT                | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotDistDotRT
+T.INV                    | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::tDotInv
+T.INV.2T                 | CATEGORY_STATISTICAL           | \PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\StudentT::inverse
 T.TEST                   | CATEGORY_STATISTICAL           | **Not yet Implemented**
 TAKE                     | CATEGORY_LOOKUP_AND_REFERENCE  | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\ChooseRowsEtc::take
 TAN                      | CATEGORY_MATH_AND_TRIG         | \PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Trig\Tangent::tan
@@ -636,7 +636,7 @@ WRAPROWS                 | CATEGORY_MATH_AND_TRIG         | **Not yet Implemente
 Excel Function           | Category                       | PhpSpreadsheet Function
 -------------------------|--------------------------------|--------------------------------------
 XIRR                     | CATEGORY_FINANCIAL             | \PhpOffice\PhpSpreadsheet\Calculation\Financial\CashFlow\Variable\NonPeriodic::rate
-XLOOKUP                  | CATEGORY_LOOKUP_AND_REFERENCE  | **Not yet Implemented**
+XLOOKUP                  | CATEGORY_LOOKUP_AND_REFERENCE  | \PhpOffice\PhpSpreadsheet\Calculation\LookupRef\XLookup::lookup
 XMATCH                   | CATEGORY_LOOKUP_AND_REFERENCE  | **Not yet Implemented**
 XNPV                     | CATEGORY_FINANCIAL             | \PhpOffice\PhpSpreadsheet\Calculation\Financial\CashFlow\Variable\NonPeriodic::presentValue
 XOR                      | CATEGORY_LOGICAL               | \PhpOffice\PhpSpreadsheet\Calculation\Logical\Operations::logicalXor
