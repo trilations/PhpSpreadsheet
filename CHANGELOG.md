@@ -9,6 +9,19 @@ a breaking change.
 
 Some earlier branches remain supported and security fixes are applied to them; if the security fix represents a breaking change, it may have to be applied as a minor or patch version.
 
+## Trilations fork - 5.11.0-alpha
+
+Changes carried by the trilations fork on top of upstream 5.11.0.
+
+### Changed
+
+- Xlsx Chart Writer always writes the X axis of scatter and bubble charts as a value axis positioned at the bottom (`c:axPos` `b`), and the Y axis at the left (`l`). New class `Chart\AxisPositionXml` holds the position values.
+- Xlsx Chart Writer hides the series outline of bubble charts (`a:ln` with `a:noFill`).
+
+### Fixed
+
+- Xlsx Chart Writer no longer writes an extra `c:spPr` ahead of `c:idx` in scatter and bubble series. The duplicate element was schema-invalid and made the reader lose the series line styles. To hide the connecting line of a scatter series, call `setScatterLines(false)` on its `DataSeriesValues`, as in upstream.
+
 ## TBD - 5.12.0
 
 ### Added

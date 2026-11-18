@@ -872,7 +872,7 @@ class Chart extends WriterPart
         $objWriter->endElement();
 
         $objWriter->startElement('c:axPos');
-        $objWriter->writeAttribute('val', $axisPositionXml);;
+        $objWriter->writeAttribute('val', $axisPositionXml);
         $objWriter->endElement();
 
         if ($majorGridlines !== null) {
@@ -1189,15 +1189,6 @@ class Chart extends WriterPart
         foreach ($plotSeriesOrder as $plotSeriesIdx => $plotSeriesRef) {
             $objWriter->startElement('c:ser');
 
-            if (($groupType == DataSeries::TYPE_SCATTERCHART) || ($groupType == DataSeries::TYPE_BUBBLECHART)) {
-                //    Line Fill
-                $objWriter->startElement('c:spPr');
-                $objWriter->startElement('a:ln');
-                $objWriter->writeElement('a:noFill');
-                $objWriter->endElement();
-                $objWriter->endElement();
-            }
-
             $objWriter->startElement('c:idx');
             $adder = array_key_exists(0, $plotSeriesOrder) ? $this->seriesIndex : 0;
             $objWriter->writeAttribute('val', (string) ($adder + $plotSeriesIdx));
@@ -1262,7 +1253,7 @@ class Chart extends WriterPart
                         $objWriter->endElement(); // a:ln
                     }
                 }
-                $nofill = $groupType === DataSeries::TYPE_STOCKCHART || (($groupType === DataSeries::TYPE_SCATTERCHART || $groupType === DataSeries::TYPE_LINECHART) && !$plotSeriesValues->getScatterLines());
+                $nofill = $groupType === DataSeries::TYPE_STOCKCHART || $groupType === DataSeries::TYPE_BUBBLECHART || (($groupType === DataSeries::TYPE_SCATTERCHART || $groupType === DataSeries::TYPE_LINECHART) && !$plotSeriesValues->getScatterLines());
                 if ($callLineStyles) {
                     $this->writeLineStyles($objWriter, $plotSeriesValues, $nofill);
                     $this->writeEffects($objWriter, $plotSeriesValues);
