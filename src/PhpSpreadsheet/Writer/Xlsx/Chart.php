@@ -8,6 +8,7 @@ use PhpOffice\PhpSpreadsheet\Chart\Chart as SpreadsheetChart;
 use PhpOffice\PhpSpreadsheet\Chart\ChartColor;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\DataTable;
 use PhpOffice\PhpSpreadsheet\Chart\Layout;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
@@ -53,10 +54,10 @@ class Chart extends WriterPart
         $objWriter->writeAttribute('xmlns:r', Namespaces::SCHEMA_OFFICE_DOCUMENT);
 
         $objWriter->startElement('c:date1904');
-        $objWriter->writeAttribute('val', '0');
+        $objWriter->writeAttribute('val', $chart->getDate1904() ? '1' : '0');
         $objWriter->endElement();
         $objWriter->startElement('c:lang');
-        $objWriter->writeAttribute('val', 'en-GB');
+        $objWriter->writeAttribute('val', $chart->getLang());
         $objWriter->endElement();
         $objWriter->startElement('c:roundedCorners');
         $objWriter->writeAttribute('val', $chart->getRoundedCorners() ? '1' : '0');
@@ -72,7 +73,6 @@ class Chart extends WriterPart
         $objWriter->writeAttribute('val', (string) (int) $chart->getAutoTitleDeleted());
         $objWriter->endElement();
 
-        $objWriter->startElement('c:view3D');
         $surface2D = false;
         $plotArea = $chart->getPlotArea();
         if ($plotArea !== null) {
@@ -85,11 +85,14 @@ class Chart extends WriterPart
                 }
             }
         }
+        $this->view3DStarted = false;
         $this->writeView3D($objWriter, $chart->getRotX(), 'c:rotX', $surface2D, 90);
         $this->writeView3D($objWriter, $chart->getRotY(), 'c:rotY', $surface2D);
         $this->writeView3D($objWriter, $chart->getRAngAx(), 'c:rAngAx', $surface2D);
         $this->writeView3D($objWriter, $chart->getPerspective(), 'c:perspective', $surface2D);
-        $objWriter->endElement(); // view3D
+        if ($this->view3DStarted) {
+            $objWriter->endElement(); // view3D
+        }
 
         $this->writePlotArea($objWriter, $chart->getPlotArea(), $chart->getXAxisLabel(), $chart->getYAxisLabel(), $chart->getChartAxisX(), $chart->getChartAxisY());
 
@@ -123,7 +126,7 @@ class Chart extends WriterPart
         $this->writeEffects($objWriter, $borderLines);
         $objWriter->endElement(); // c:spPr
 
-        $this->writePrintSettings($objWriter);
+        $this->writePrintSettings($objWriter, $chart);
 
         $objWriter->endElement(); // c:chartSpace
 
@@ -131,12 +134,18 @@ class Chart extends WriterPart
         return $objWriter->getData();
     }
 
+    private bool $view3DStarted = false;
+
     private function writeView3D(XMLWriter $objWriter, ?int $value, string $tag, bool $surface2D, int $default = 0): void
     {
         if ($value === null && $surface2D) {
             $value = $default;
         }
         if ($value !== null) {
+            if (!$this->view3DStarted) {
+                $objWriter->startElement('c:view3D');
+                $this->view3DStarted = true;
+            }
             $objWriter->startElement($tag);
             $objWriter->writeAttribute('val', "$value");
             $objWriter->endElement();
@@ -305,6 +314,8 @@ class Chart extends WriterPart
         $objWriter->endElement(); // c:legend
     }
 
+    private string $chartType = '';
+
     /**
      * Write Chart Plot Area.
      */
@@ -328,6 +339,7 @@ class Chart extends WriterPart
         $chartType = null;
         foreach ($chartTypes as $chartType) {
             $objWriter->startElement('c:' . $chartType);
+            $this->chartType = $chartType;
 
             $groupCount = $plotArea->getPlotGroupCount();
             $plotGroup = null;
@@ -445,6 +457,10 @@ class Chart extends WriterPart
                 $this->writeValueAxis($objWriter, $xAxisLabel, $chartType, $id2, $id1, $catIsMultiLevelSeries, $xAxis ?? new Axis(), AxisPositionXml::BOTTOM);
             } else {
                 $this->writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $catIsMultiLevelSeries, $xAxis ?? new Axis());
+                $dataTable = $plotArea->getDataTable();
+                if ($dataTable !== null) {
+                    $this->writeDataTable($objWriter, $dataTable);
+                }
             }
 
             $this->writeValueAxis($objWriter, $yAxisLabel, $chartType, $id1, $id2, $valIsMultiLevelSeries, $yAxis ?? new Axis(), AxisPositionXml::LEFT);
@@ -483,6 +499,29 @@ class Chart extends WriterPart
         $objWriter->endElement(); // c:plotArea
     }
 
+    private function writeDataTable(XMLWriter $objWriter, DataTable $dataTable): void
+    {
+        $objWriter->startElement('c:dTable');
+
+        $objWriter->startElement('c:showHorzBorder');
+        $objWriter->writeAttribute('val', $dataTable->getShowHorizontalBorder() ? '1' : '0');
+        $objWriter->endElement();
+
+        $objWriter->startElement('c:showVertBorder');
+        $objWriter->writeAttribute('val', $dataTable->getShowVerticalBorder() ? '1' : '0');
+        $objWriter->endElement();
+
+        $objWriter->startElement('c:showOutline');
+        $objWriter->writeAttribute('val', $dataTable->getShowOutline() ? '1' : '0');
+        $objWriter->endElement();
+
+        $objWriter->startElement('c:showKeys');
+        $objWriter->writeAttribute('val', $dataTable->getShowKeys() ? '1' : '0');
+        $objWriter->endElement();
+
+        $objWriter->endElement(); // c:dTable
+    }
+
     private function writeDataLabelsBool(XMLWriter $objWriter, string $name, ?bool $value): void
     {
         if ($value !== null) {
@@ -519,12 +558,12 @@ class Chart extends WriterPart
             $objWriter->startElement('c:txPr');
 
             $objWriter->startElement('a:bodyPr');
-            $objWriter->writeAttribute('wrap', 'square');
-            $objWriter->writeAttribute('lIns', '38100');
-            $objWriter->writeAttribute('tIns', '19050');
-            $objWriter->writeAttribute('rIns', '38100');
-            $objWriter->writeAttribute('bIns', '19050');
-            $objWriter->writeAttribute('anchor', 'ctr');
+            $bodyPr = $chartLayout->getBodyPr();
+            foreach (['vertOverflow', 'horzOverflow', 'wrap', 'lIns', 'tIns', 'rIns', 'bIns', 'anchor'] as $key) {
+                if (isset($bodyPr[$key])) {
+                    $objWriter->writeAttribute($key, $bodyPr[$key]);
+                }
+            }
             $objWriter->startElement('a:spAutoFit');
             $objWriter->endElement(); // a:spAutoFit
             $objWriter->endElement(); // a:bodyPr
@@ -1695,27 +1734,32 @@ class Chart extends WriterPart
     /**
      * Write Printer Settings.
      */
-    private function writePrintSettings(XMLWriter $objWriter): void
+    private function writePrintSettings(XMLWriter $objWriter, SpreadsheetChart $chart): void
     {
         $objWriter->startElement('c:printSettings');
 
         $objWriter->startElement('c:headerFooter');
         $objWriter->endElement();
 
+        $pageMargins = $chart->getPageMargins();
         $objWriter->startElement('c:pageMargins');
-        $objWriter->writeAttribute('footer', '0.3');
-        $objWriter->writeAttribute('header', '0.3');
-        $objWriter->writeAttribute('r', '0.7');
-        $objWriter->writeAttribute('l', '0.7');
-        $objWriter->writeAttribute('t', '0.75');
-        $objWriter->writeAttribute('b', '0.75');
-        $objWriter->endElement();
+        foreach (['b', 'l', 'r', 't', 'header', 'footer'] as $key) {
+            if (array_key_exists($key, $pageMargins)) {
+                $objWriter->writeAttribute($key, $pageMargins[$key]);
+            }
+        }
+        $objWriter->endElement(); // c:pageMargins
 
+        $pageSetup = $chart->getPageSetup();
         $objWriter->startElement('c:pageSetup');
-        $objWriter->writeAttribute('orientation', 'portrait');
-        $objWriter->endElement();
+        foreach (['paperSize', 'orientation'] as $key) {
+            if (array_key_exists($key, $pageSetup)) {
+                $objWriter->writeAttribute($key, $pageSetup[$key]);
+            }
+        }
+        $objWriter->endElement(); // c:pageSetup
 
-        $objWriter->endElement();
+        $objWriter->endElement(); // c:printSettings
     }
 
     private function writeEffects(XMLWriter $objWriter, Properties $yAxis): void
@@ -1885,9 +1929,11 @@ class Chart extends WriterPart
                 $objWriter->startElement('a:lumMod');
                 $objWriter->writeAttribute('val', ChartColor::alphaToXml($brightness));
                 $objWriter->endElement(); // a:lumMod
-                $objWriter->startElement('a:lumOff');
-                $objWriter->writeAttribute('val', ChartColor::alphaToXml($lumOff));
-                $objWriter->endElement(); // a:lumOff
+                if ($this->chartType !== DataSeries::TYPE_RADARCHART) {
+                    $objWriter->startElement('a:lumOff');
+                    $objWriter->writeAttribute('val', ChartColor::alphaToXml($lumOff));
+                    $objWriter->endElement(); // a:lumOff
+                }
             }
             $objWriter->endElement(); //a:srgbClr/schemeClr/prstClr
             if ($solidFill) {

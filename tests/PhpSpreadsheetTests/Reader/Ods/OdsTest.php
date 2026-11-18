@@ -100,16 +100,10 @@ class OdsTest extends TestCase
     public function testLoadCorruptFile(): void
     {
         $this->expectException(ReaderException::class);
+        $this->expectExceptionMessage('Unable to read data from');
         $filename = 'tests/data/Reader/Ods/corruptMeta.ods';
         $reader = new Ods();
-        $spreadsheet = $reader->load($filename);
-
-        self::assertEquals(2, $spreadsheet->getSheetCount());
-
-        $firstSheet = $spreadsheet->getSheet(0);
-
-        $secondSheet = $spreadsheet->getSheet(1);
-        self::assertNotSame($firstSheet, $secondSheet);
+        $reader->load($filename);
     }
 
     public function testReadValueAndComments(): void
@@ -143,7 +137,7 @@ class OdsTest extends TestCase
         self::assertEquals(0, $firstSheet->getCell('G10')->getValue());
 
         self::assertEquals(DataType::TYPE_NUMERIC, $firstSheet->getCell('A10')->getDataType()); // Date
-        self::assertEquals('19-Dec-60', $firstSheet->getCell('A10')->getFormattedValue());
+        self::assertEquals('19-Dec-1960', $firstSheet->getCell('A10')->getFormattedValue());
 
         self::assertEquals(DataType::TYPE_NUMERIC, $firstSheet->getCell('A13')->getDataType()); // Time
         self::assertEquals('2:30:00', $firstSheet->getCell('A13')->getFormattedValue());

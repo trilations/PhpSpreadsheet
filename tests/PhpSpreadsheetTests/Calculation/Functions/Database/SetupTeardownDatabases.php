@@ -160,13 +160,16 @@ class SetupTeardownDatabases extends TestCase
         $maxCol = '';
         $startCol = 'P';
         $maxRow = 0;
-        $startRow = 1;
+        //$startRow = 1; // unchange from above
         $row = $startRow;
         foreach ($criteria as $dataRow) {
             /** @var mixed[] $dataRow */
             $col = $startCol;
             foreach ($dataRow as $dataCell) {
-                if ($dataCell !== null) {
+                if (is_bool($dataCell)) {
+                    // A logical criterion is a TRUE/FALSE cell, not the text "1" or ""
+                    $sheet->getCell("$col$row")->setValueExplicit($dataCell, DataType::TYPE_BOOL);
+                } elseif ($dataCell !== null) {
                     $sheet->getCell("$col$row")->setValueExplicit($dataCell, DataType::TYPE_STRING);
                 }
                 $maxCol = max($col, $maxCol);
